@@ -5,62 +5,36 @@ from scipy.stats import bootstrap
 from correlation import (
     dropna,
     get_p_value,
-    CORRELATION_FUNCTIONS,
+    dropna_pearsonr,
+    dropna_spearmanr,
     print_r_anp_p,
     print_conf_interval_and_se
 )
 
 
-BOOTSTRAP_OUTPUT_MODES = {
-    'r_and_p_values': print_r_anp_p,
-    'conf_interval_and_se': print_conf_interval_and_se
-}
-
-
 class SuperbDataFrame(DataFrame):
 
-    def corr_and_p_value(self, method: str = 'pearson',
+    def corr_and_p_value(self, corr_method=dropna_pearsonr,
                          r_decimals: int = 2, p_decimals: int = 3) -> DataFrame:
 
         result = DataFrame(columns=self.columns)
         result = result.transpose().join(result, how='outer')
 
-        get_corr = CORRELATION_FUNCTIONS.get(method)
-
-        if not get_corr:
-            raise ValueError(
-                f"Method must be either 'pearson' or 'spearman'! '{method}' was supplied"
-            )
-
         for c1 in self.columns:
             for c2 in self.columns:
-                r, p = get_corr(self[c1], self[c2])
+                r, p = corr_method(self[c1], self[c2])
                 result[c1][c2] = print_r_anp_p(r, p, r_decimals, p_decimals)
 
         return result
 
     def bootstrap_corr(self, bootstrap_parameters: dict,
-                       method: str = 'spearman', output_mode: str = 'r_and_p_values',
+                       corr_method=dropna_spearmanr, output_func=print_r_anp_p,
                        r_decimals: int = 2, p_decimals: int = 3,) -> DataFrame:
         result = DataFrame(columns=self.columns)
         result = result.transpose().join(result, how='outer')
 
-        corr_func = CORRELATION_FUNCTIONS.get(method)
-        output_func = BOOTSTRAP_OUTPUT_MODES.get(output_mode)
-
-        if not corr_func:
-            raise ValueError(
-                f"Method must be either 'pearson' or 'spearman'! '{method}' was supplied!"
-            )
-
-        if not output_func:
-            raise ValueError(
-                f"Bootstrap Mode must be either 'r_and_p_values' or 'conf_interval_and_se'!"
-                f"'{output_mode}' was supplied!"
-            )
-
         def get_corr(x, y):
-            return corr_func(x, y)[0]
+            return corr_method(x, y)[0]
 
         for c1 in self.columns:
             for c2 in self.columns:
@@ -73,9 +47,17 @@ class SuperbDataFrame(DataFrame):
                     n = len(dropna(self[c1], self[c2])[0])
                     p = get_p_value(r, n)
 
-                    params = (r, p) if output_mode == 'r_and_p_values' else (low, high, se)
+                    params = {
+                        'r': r,
+                        'p': p,
+                        'low': low,
+                        'high': high,
+                        'se': se,
+                        'r_decimals': r_decimals,
+                        'p_decimals': p_decimals
+                    }
 
-                    result[c1][c2] = output_func(*params, r_decimals, p_decimals)
+                    result[c1][c2] = output_func(**params)
                 else:
                     result[c1][c2] = NaN
         return result

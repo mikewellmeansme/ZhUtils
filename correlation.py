@@ -30,12 +30,6 @@ def dropna_spearmanr(x: list, y: list) -> tuple[array, array]:
     return r, p
 
 
-CORRELATION_FUNCTIONS = {
-    'pearson': dropna_pearsonr,
-    'spearman': dropna_spearmanr
-}
-
-
 def get_t_stat(r: float, n: int) -> float:
     return (r * sqrt(n - 2)) / (sqrt(1 - r ** 2))
 
@@ -47,10 +41,10 @@ def get_p_value(r: float, n: int) -> float:
 
 
 def print_r_anp_p(r: float, p: float,
-                  r_decimals: int = 2, p_decimals: int = 3) -> str:
+                  r_decimals: int = 2, p_decimals: int = 3, **kwargs) -> str:
     return f"{r:.{r_decimals}f}\n(p={p:.{p_decimals}f})"
 
 
 def print_conf_interval_and_se(low: float, high: float, se: float,
-                               r_decimals: int = 2, se_decimals: int = 3) -> str:
+                               r_decimals: int = 2, se_decimals: int = 3, **kwargs) -> str:
     return f"[{low:.{r_decimals}f}; {high:.{r_decimals}f}]\n(se={se:.{se_decimals}f})"
