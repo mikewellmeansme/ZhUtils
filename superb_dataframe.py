@@ -22,7 +22,7 @@ class SuperbDataFrame(DataFrame):
 
     def corr_and_p_value(self, corr_function: Callable[[Iterable, Iterable], tuple[float, float]] = dropna_pearsonr,
                          r_decimals: int = 2, p_decimals: int = 3) -> DataFrame:
-        """
+        r"""
         Similar to DataFrame.corr(), but returns correlations between columns with their p-values.
         Cell format: '0.90\n(p=0.001)'.
 
@@ -47,7 +47,7 @@ class SuperbDataFrame(DataFrame):
                        corr_function: Callable[[Iterable, Iterable], tuple[float, float]] = dropna_spearmanr,
                        output_func: Callable[..., Union[str, float]] = print_r_anp_p,
                        r_decimals: int = 2, p_decimals: int = 3, ) -> DataFrame:
-        """
+        r"""
         Similar to DataFrame.corr(), but returns bootstrap correlations between columns.
         Cell format must be described in output_func.
 
