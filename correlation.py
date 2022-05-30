@@ -1,3 +1,9 @@
+from typing import (
+    Union,
+    Callable,
+    Iterable
+)
+
 from numpy import (
     array,
     isnan,
@@ -11,20 +17,20 @@ from scipy.stats import (
 )
 
 
-def dropna(x: list, y: list) -> tuple[array, array]:
+def dropna(x: Iterable, y: Iterable) -> tuple[array, array]:
     x, y = array(x), array(y)
     nas = logical_or(isnan(x), isnan(y))
     x, y = x[~nas], y[~nas]
     return x, y
 
 
-def dropna_pearsonr(x: list, y: list) -> tuple[array, array]:
+def dropna_pearsonr(x: Iterable, y: Iterable) -> tuple[float, float]:
     x, y = dropna(x, y)
     r, p = pearsonr(x, y)
     return r, p
 
 
-def dropna_spearmanr(x: list, y: list) -> tuple[array, array]:
+def dropna_spearmanr(x: Iterable, y: Iterable) -> tuple[float, float]:
     x, y = dropna(x, y)
     r, p = spearmanr(x, y)
     return r, p
