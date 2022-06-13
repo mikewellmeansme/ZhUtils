@@ -103,7 +103,7 @@ class SuperbDataFrame(DataFrame):
 
     def pairwise_len(self) -> DataFrame:
         r"""
-        Returns the DataFrame with lengths of pairwise intersection of columns
+        Returns the DataFrame with lengths of pairwise overlay of columns
 
         Example:
             For DataFrame:
