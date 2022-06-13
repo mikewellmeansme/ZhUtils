@@ -10,7 +10,7 @@ from typing import (
     Iterable
 )
 
-from correlation import (
+from zhutils.correlation import (
     dropna,
     get_p_value,
     dropna_pearsonr,

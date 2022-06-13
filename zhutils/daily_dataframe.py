@@ -6,7 +6,7 @@ from pandera import (
     DataFrameSchema
 )
 from pandera.errors import SchemaError
-from superb_dataframe import SuperbDataFrame
+from zhutils.superb_dataframe import SuperbDataFrame
 
 
 schema = DataFrameSchema({
