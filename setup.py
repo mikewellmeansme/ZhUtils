@@ -1,7 +1,7 @@
 import setuptools
 
 setuptools.setup(
-    name='zh_utils',
+    name='zhutils',
     version='0.0.1',
     description='A personal collection of tools for data processing',
     author='Mikhail Zharkov',
