@@ -1,12 +1,14 @@
+from numpy import NaN
+from pandas import ( 
+    DataFrame,
+    Series
+)
+from scipy.stats import bootstrap
 from typing import (
     Union,
     Callable,
     Iterable
 )
-
-from numpy import NaN
-from pandas import DataFrame
-from scipy.stats import bootstrap
 
 from correlation import (
     dropna,
@@ -20,8 +22,8 @@ from correlation import (
 
 class SuperbDataFrame(DataFrame):
 
-    def corr_and_p_value(self, corr_function: Callable[[Iterable, Iterable], tuple[float, float]] = dropna_pearsonr,
-                         r_decimals: int = 2, p_decimals: int = 3) -> DataFrame:
+    def corr_and_p_values(self, corr_function: Callable[[Iterable, Iterable], tuple[float, float]] = dropna_pearsonr,
+                          r_decimals: int = 2, p_decimals: int = 3) -> DataFrame:
         r"""
         Similar to DataFrame.corr(), but returns correlations between columns with their p-values.
         Cell format: '0.90\n(p=0.001)'.
@@ -42,6 +44,7 @@ class SuperbDataFrame(DataFrame):
                 result[c1][c2] = print_r_anp_p(r, p, r_decimals, p_decimals)
 
         return result
+
 
     def bootstrap_corr(self, bootstrap_parameters: dict,
                        corr_function: Callable[[Iterable, Iterable], tuple[float, float]] = dropna_spearmanr,
@@ -92,6 +95,7 @@ class SuperbDataFrame(DataFrame):
                     result[c1][c2] = NaN
         return result
 
+
     def pairwise_len(self) -> DataFrame:
         r"""
         Returns the DataFrame with lengths of pairwise intersection of columns
@@ -116,3 +120,12 @@ class SuperbDataFrame(DataFrame):
             for c2 in self.columns:
                 result[c1][c2] = len(dropna(self[c1], self[c2])[0])
         return result
+    
+
+    def median_index(self) -> Series:
+        r"""
+        Returns the Series with indexes for the median elements per column
+        """
+        ranks = self.rank(pct=True)
+        close_to_median = abs(ranks - 0.5)
+        return close_to_median.idxmin()
