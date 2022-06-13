@@ -1,3 +1,3 @@
-from correlation import *
-from superb_dataframe import *
-from daily_dataframe import *
+import correlation
+import superb_dataframe
+import daily_dataframe
