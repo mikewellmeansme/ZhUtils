@@ -91,3 +91,28 @@ class SuperbDataFrame(DataFrame):
                 else:
                     result[c1][c2] = NaN
         return result
+
+    def pairwise_len(self) -> DataFrame:
+        r"""
+        Returns the DataFrame with lengths of pairwise intersection of columns
+
+        Example:
+            For DataFrame:
+                A B C
+              1 1   7
+              2 2 5 8
+              3   6 9
+              4 4   10
+            It will teturn:
+                A B C
+              A 3 1 3
+              B 1 2 2
+              C 3 2 4
+              
+        """
+        dfcols = DataFrame(columns=self.columns)
+        result = dfcols.transpose().join(dfcols, how='outer')
+        for c1 in self.columns:
+            for c2 in self.columns:
+                result[c1][c2] = len(dropna(self[c1], self[c2])[0])
+        return result
