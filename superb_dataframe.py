@@ -22,6 +22,11 @@ from correlation import (
 
 class SuperbDataFrame(DataFrame):
 
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+
     def corr_and_p_values(self, corr_function: Callable[[Iterable, Iterable], tuple[float, float]] = dropna_pearsonr,
                           r_decimals: int = 2, p_decimals: int = 3) -> DataFrame:
         r"""
@@ -48,7 +53,7 @@ class SuperbDataFrame(DataFrame):
 
     def bootstrap_corr(self, bootstrap_parameters: dict,
                        corr_function: Callable[[Iterable, Iterable], tuple[float, float]] = dropna_spearmanr,
-                       output_func: Callable[..., Union[str, float]] = print_r_anp_p,
+                       output_function: Callable[..., Union[str, float]] = print_r_anp_p,
                        r_decimals: int = 2, p_decimals: int = 3, ) -> DataFrame:
         r"""
         Similar to DataFrame.corr(), but returns bootstrap correlations between columns.
@@ -58,7 +63,7 @@ class SuperbDataFrame(DataFrame):
             bootstrap_parameters: Parameters for the scipy.stats.bootstrap()
             corr_function: Function for correlation calculations (default Pearson).
                            Signature: corr_function(Iterable, Iterable) -> (float, float)
-            output_func: Function for describing the cell format (default '0.90\n(p=0.001)').
+            output_function: Function for describing the cell format (default '0.90\n(p=0.001)').
                          Signature: output_func(r, p, high, low, se, r_decimals, p_decimals) -> str|float
             r_decimals: Number of decimal places of the correlation coefficient
             p_decimals: Number of decimal places of the p-value
@@ -90,7 +95,7 @@ class SuperbDataFrame(DataFrame):
                         'p_decimals': p_decimals
                     }
 
-                    result[c1][c2] = output_func(**params)
+                    result[c1][c2] = output_function(**params)
                 else:
                     result[c1][c2] = NaN
         return result
