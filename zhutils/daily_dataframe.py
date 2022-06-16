@@ -1,3 +1,4 @@
+import matplotlib.pylab as plt
 from numpy import nanmean as np_nanmean
 from pandas import read_excel
 from pandera import (
@@ -50,6 +51,41 @@ class DailyDataFrame(SuperbDataFrame):
         result = self.rolling(window=window, center=True, min_periods=1).sum()
         
         return result
+    
+
+    def plot_climate(self, temp_ylim: list = [-25, 25], prec_ylim: list = [0, 70]) -> tuple:
+        r"""
+        Plot mean teperatures for all year and mean total precipitation
+        """
+        plt.rcParams['font.size'] = '16'
+        fig, ax = plt.subplots(nrows=1, ncols=1, dpi=300, figsize=(6, 6))
+        plt.subplots_adjust(top=0.95, bottom=.1, right=.89, left=.11)
+        
+        ax.yaxis.set_label_coords(-.08, .5)
+        ax2 = ax.twinx()
+        ax.set_zorder(1)  # default zorder is 0 for ax1 and ax2
+        ax.patch.set_visible(False)  # prevents ax1 from hiding ax2
+        ax2.patch.set_visible(True)
+        mean_prec = []
+        mean_temp = []
+
+        for i in range(1, 13):
+            month_df = self[self['Month'] == i]
+            mean_prec.append(month_df.groupby('Year').sum()['Precipitation'].mean())
+            mean_temp.append(month_df.groupby('Year').mean()['Temperature'].mean())
+        
+        ax.axhline(0, c='lightgrey')
+        ax.plot(mean_temp, c='firebrick', linewidth=3)
+        ax2.bar(range(12), mean_prec, color='royalblue', width=1)
+        ax.set_xticks(range(12))
+        ax.set_xticklabels(['J', 'F', 'M', 'A', 'M ', 'J', 'J', 'A', 'S', 'O', 'N', 'D'])
+        ax.set_ylabel('T, °C')
+
+        ax2.set_ylabel('P, mm')
+        ax.set_ylim(temp_ylim)
+        ax2.set_ylim(prec_ylim)
+        ax.set_xlabel('Month')
+        return fig, ax
 
 
 def daily_df_reshape(file_path: str, temp_sheet: str, prec_sheet: str) -> SuperbDataFrame:
