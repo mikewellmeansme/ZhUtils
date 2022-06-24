@@ -1,21 +1,29 @@
+from ast import Call
 import matplotlib.pylab as plt
 from numpy import nanmean as np_nanmean
-from pandas import read_excel
+from pandas import (
+    read_excel,
+    DataFrame
+)
 from pandera import (
     Check,
     Column,
     DataFrameSchema
 )
-from pandera.errors import SchemaError
+from typing import Callable
 from zhutils.superb_dataframe import SuperbDataFrame
 
 
-schema = DataFrameSchema({
+daily_dataframe_schema = DataFrameSchema({
     'Year' : Column(int),
     'Month': Column(int),
     'Day': Column(int),
     'Temperature': Column(float, checks=[Check.ge(-100), Check.le(100)], nullable=True),
     'Precipitation': Column(float, checks=[Check.ge(0), Check.le(1000)], nullable=True),
+})
+
+other_schema = DataFrameSchema({
+    'Year' : Column(int)
 })
 
 
@@ -24,7 +32,7 @@ class DailyDataFrame(SuperbDataFrame):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        schema.validate(self)
+        daily_dataframe_schema.validate(self)
 
     
     def moving_avg(self, columns: list, window: int = 7, nanmean: bool = False):
@@ -53,9 +61,9 @@ class DailyDataFrame(SuperbDataFrame):
         return result
     
 
-    def plot_climate(self, temp_ylim: list = [-25, 25], prec_ylim: list = [0, 70]) -> tuple:
+    def plot_monthly(self, temp_ylim: list = [-25, 25], prec_ylim: list = [0, 70]) -> tuple:
         r"""
-        Plot mean teperatures for all year and mean total precipitation
+        Plot mean teperatures for all years and mean total precipitation
         """
         plt.rcParams['font.size'] = '16'
         fig, ax = plt.subplots(nrows=1, ncols=1, dpi=300, figsize=(6, 6))
@@ -86,6 +94,44 @@ class DailyDataFrame(SuperbDataFrame):
         ax2.set_ylim(prec_ylim)
         ax.set_xlabel('Month')
         return fig, ax
+    
+
+    def compare_with_daily(
+            self,
+            other: DataFrame,
+            compare_method: Callable[[DataFrame], tuple[float, float]],
+            index: str = 'Temperature',
+            previous_year: bool = False
+        ):
+
+        r"""
+        Params:
+            other: DataFrame с которым происходит сравнение,
+            compare_method: Метод сравнения (Принимает на вход DataFrame с колонкой Year),
+            index: 'Temperature', или 'Precipitation'
+            previous_year: Флаг того, сравнивается ли климатика этого года или предыдущего
+        """
+
+        other_schema.validate(other)
+
+        groups = self.drop(columns=['Year']).groupby(['Month', 'Day']).groups
+
+        comparison = []
+
+        for key in groups:
+            temp_df = self.loc[groups[key]]
+            if previous_year:
+                temp_df['Temperature'] = temp_df['Temperature'].shift()
+                temp_df['Precipitation'] = temp_df['Precipitation'].shift()
+
+            to_compare = temp_df.merge(other, on='Year')
+            stat, p_value = compare_method(to_compare, index)
+
+            comparison.append([*key, stat, p_value])
+        
+        columns = {0: 'Month', 1:'Day', 2:'Stat', 3:'P-value'}
+        result = DataFrame(comparison).rename(columns=columns)
+        return result
 
 
 def daily_df_reshape(file_path: str, temp_sheet: str, prec_sheet: str) -> SuperbDataFrame:
