@@ -1,4 +1,3 @@
-from ast import Call
 import matplotlib.pylab as plt
 from numpy import nanmean as np_nanmean
 from pandas import (
@@ -101,6 +100,7 @@ class DailyDataFrame(SuperbDataFrame):
             other: DataFrame,
             compare_method: Callable[[DataFrame], tuple[float, float]],
             index: str = 'Temperature',
+            moving_avg_window = None,
             previous_year: bool = False
         ):
 
@@ -109,17 +109,26 @@ class DailyDataFrame(SuperbDataFrame):
             other: DataFrame с которым происходит сравнение,
             compare_method: Метод сравнения (Принимает на вход DataFrame с колонкой Year),
             index: 'Temperature', или 'Precipitation'
+            moving_avg_window: Окно скользящего среднего. По-умолчанию None -- сглаживание не применяется
             previous_year: Флаг того, сравнивается ли климатика этого года или предыдущего
         """
 
         other_schema.validate(other)
 
-        groups = self.drop(columns=['Year']).groupby(['Month', 'Day']).groups
+        if moving_avg_window:
+            df = self.copy()
+            rolled_df = self.moving_avg(['Temperature', 'Precipitation'], moving_avg_window)
+            df['Temperature'] = rolled_df['Temperature']
+            df['Precipitation'] = rolled_df['Precipitation']
+        else:
+            df = self
+
+        groups = df.drop(columns=['Year']).groupby(['Month', 'Day']).groups
 
         comparison = []
 
         for key in groups:
-            temp_df = self.loc[groups[key]]
+            temp_df = df.loc[groups[key]]
             if previous_year:
                 temp_df['Temperature'] = temp_df['Temperature'].shift()
                 temp_df['Precipitation'] = temp_df['Precipitation'].shift()
