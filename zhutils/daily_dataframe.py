@@ -1,7 +1,10 @@
 import matplotlib.pylab as plt
+from matplotlib.ticker import NullFormatter
+from matplotlib.dates import MonthLocator, DateFormatter
 from numpy import nanmean as np_nanmean
 from pandas import (
-    read_excel,
+    merge,
+    read_excel, 
     DataFrame
 )
 from pandera import (
@@ -156,6 +159,78 @@ class DailyDataFrame(SuperbDataFrame):
         columns = {0: 'Month', 1:'Day', 2:'Stat', 3:'P-value'}
         result = DataFrame(comparison).rename(columns=columns)
         return result
+    
+
+    def get_full_daily_comparison(
+            self,
+            other: DataFrame,
+            compare_by: ComparisonFunction,
+            moving_avg_window: Optional[int] = None,
+        ) -> DataFrame:
+        r"""
+        Возвращает DataFrame с полным сравнением климатики с other по функции compare_by
+
+        Params:
+            other: DataFrame с которым происходит сравнение,
+            compare_by: Функция сравнения (Принимает на вход DataFrame с колонкой Year),
+            moving_avg_window: Окно скользящего среднего для сглаживания климатики. По-умолчанию None -- сглаживание не применяется
+        """
+
+        temp = self.compare_with_daily(other, compare_by, moving_avg_window=moving_avg_window)
+        temp_prev = self.compare_with_daily(other, compare_by, moving_avg_window=moving_avg_window, previous_year=True)
+        prec = self.compare_with_daily(other, compare_by, moving_avg_window=moving_avg_window, index='Precipitation')
+        prec_prev = self.compare_with_daily(other, compare_by, moving_avg_window=moving_avg_window, previous_year=True, index='Precipitation')
+
+        temp_interim = merge(temp, temp_prev, on=['Month', 'Day'], suffixes=(' Temp', ' Temp prev'))
+        prec_interim = merge(prec, prec_prev, on=['Month', 'Day'], suffixes=(' Prec', ' Prec prev'))
+
+        result = merge(temp_interim, prec_interim, on=['Month', 'Day'])
+
+        return result
+
+
+    def plot_full_daily_comparison(
+            self,
+            other: DataFrame,
+            compare_by: ComparisonFunction,
+            title: str,
+            moving_avg_window: Optional[int] = None,
+            xlim: list = [-180, 280]
+        ) -> tuple:
+
+        r"""
+        Строит график подневного сравнения климатики с other по функции compare_by
+
+        Params:
+            other: DataFrame с которым происходит сравнение,
+            compare_by: Функция сравнения (Принимает на вход DataFrame с колонкой Year),
+            title: Заголовок графика
+            moving_avg_window: Окно скользящего среднего для сглаживания климатики. По-умолчанию None -- сглаживание не применяется
+            xlim: Пределы по оси x графика
+        """
+
+        comparison = self.get_full_daily_comparison(other, compare_by, moving_avg_window)
+
+        fig, ax = plt.subplots(nrows=1, ncols=1, dpi=200, figsize=(15, 3))
+
+        ax.xaxis.set_major_locator(MonthLocator())
+        ax.xaxis.set_minor_locator(MonthLocator(bymonthday=15))
+        ax.xaxis.set_major_formatter(NullFormatter())
+        ax.xaxis.set_minor_formatter(DateFormatter('%b'))
+
+        x = range(1, len(comparison) + 1)
+        prev_x = range(-len(comparison) + 1, 1)
+        
+        ax.plot(x, comparison['Stat Temp'], color='red')
+        ax.plot(x, comparison['Stat Prec'], color='blue')
+        ax.plot(prev_x, comparison['Stat Temp prev'], color='red', label='Temperature')
+        ax.plot(prev_x, comparison['Stat Prec prev'], color='blue', label='Precipitation')
+
+        ax.legend(frameon=False)
+        ax.set_xlim(xlim)
+        ax.set_title(title)
+
+        return fig, ax
 
 
 def daily_df_reshape(file_path: str, temp_sheet: str, prec_sheet: str) -> SuperbDataFrame:
