@@ -110,6 +110,9 @@ class DailyDataFrame(SuperbDataFrame):
         ax.set_ylim(temp_ylim)
         ax2.set_ylim(prec_ylim)
         ax.set_xlabel('Month')
+
+        plt.rcParams['font.size'] = '10'
+        
         return fig, ax
     
 
