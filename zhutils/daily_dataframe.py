@@ -9,7 +9,7 @@ from pandera import (
     Column,
     DataFrameSchema
 )
-from typing import Callable
+from typing import Callable, Optional
 from zhutils.superb_dataframe import SuperbDataFrame
 
 
@@ -25,6 +25,8 @@ other_schema = DataFrameSchema({
     'Year' : Column(int)
 })
 
+ComparisonFunction = Callable[[DataFrame], tuple[float, float]]
+
 
 class DailyDataFrame(SuperbDataFrame):
 
@@ -34,9 +36,14 @@ class DailyDataFrame(SuperbDataFrame):
         daily_dataframe_schema.validate(self)
 
     
-    def moving_avg(self, columns: list, window: int = 7, nanmean: bool = False):
+    def moving_avg(
+            self,
+            columns: list,
+            window: int = 7,
+            nanmean: Optional[bool] = False
+        ) -> DataFrame:
         r"""
-        Возвращает скользящее средние для температуры
+        Возвращает скользящее среднее
         window : окно
         nanmean : используем nanmean для сглаживания? (тогда потеряются данные по краям)
         """
@@ -49,7 +56,11 @@ class DailyDataFrame(SuperbDataFrame):
         return result
 
 
-    def moving_sum(self,  columns: list, window: int = 7,):
+    def moving_sum(
+            self, 
+            columns: list,
+            window: int = 7
+        )-> DataFrame:
         r"""
         Возвращает скользящую сумму для выбранных колонок
         window : окно
@@ -60,7 +71,11 @@ class DailyDataFrame(SuperbDataFrame):
         return result
     
 
-    def plot_monthly(self, temp_ylim: list = [-25, 25], prec_ylim: list = [0, 70]) -> tuple:
+    def plot_monthly(
+            self,
+            temp_ylim: list = [-25, 25],
+            prec_ylim: list = [0, 70]
+        ) -> tuple:
         r"""
         Plot mean teperatures for all years and mean total precipitation
         """
@@ -98,18 +113,18 @@ class DailyDataFrame(SuperbDataFrame):
     def compare_with_daily(
             self,
             other: DataFrame,
-            compare_method: Callable[[DataFrame], tuple[float, float]],
+            compare_by: ComparisonFunction,
             index: str = 'Temperature',
-            moving_avg_window = None,
-            previous_year: bool = False
+            moving_avg_window: Optional[int] = None,
+            previous_year: Optional[bool] = False
         ):
 
         r"""
         Params:
             other: DataFrame с которым происходит сравнение,
-            compare_method: Метод сравнения (Принимает на вход DataFrame с колонкой Year),
+            compare_by: Функция сравнения (Принимает на вход DataFrame с колонкой Year),
             index: 'Temperature', или 'Precipitation'
-            moving_avg_window: Окно скользящего среднего. По-умолчанию None -- сглаживание не применяется
+            moving_avg_window: Окно скользящего среднего для сглаживания климатики. По-умолчанию None -- сглаживание не применяется
             previous_year: Флаг того, сравнивается ли климатика этого года или предыдущего
         """
 
@@ -134,7 +149,7 @@ class DailyDataFrame(SuperbDataFrame):
                 temp_df['Precipitation'] = temp_df['Precipitation'].shift()
 
             to_compare = temp_df.merge(other, on='Year')
-            stat, p_value = compare_method(to_compare, index)
+            stat, p_value = compare_by(to_compare, index)
 
             comparison.append([*key, stat, p_value])
         
