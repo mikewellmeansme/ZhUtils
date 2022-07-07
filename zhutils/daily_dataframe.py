@@ -116,7 +116,7 @@ class DailyDataFrame(SuperbDataFrame):
     def compare_with_daily(
             self,
             other: DataFrame,
-            compare_by: ComparisonFunction,
+            using: ComparisonFunction,
             index: str = 'Temperature',
             moving_avg_window: Optional[int] = None,
             previous_year: Optional[bool] = False
@@ -125,7 +125,7 @@ class DailyDataFrame(SuperbDataFrame):
         r"""
         Params:
             other: DataFrame с которым происходит сравнение,
-            compare_by: Функция сравнения (Принимает на вход DataFrame с колонкой Year),
+            using: Функция сравнения (Принимает на вход DataFrame с колонкой Year),
             index: 'Temperature', или 'Precipitation'
             moving_avg_window: Окно скользящего среднего для сглаживания климатики. По-умолчанию None -- сглаживание не применяется
             previous_year: Флаг того, сравнивается ли климатика этого года или предыдущего
@@ -152,7 +152,7 @@ class DailyDataFrame(SuperbDataFrame):
                 temp_df['Precipitation'] = temp_df['Precipitation'].shift()
 
             to_compare = temp_df.merge(other, on='Year')
-            stat, p_value = compare_by(to_compare, index)
+            stat, p_value = using(to_compare, index)
 
             comparison.append([*key, stat, p_value])
         
@@ -164,22 +164,22 @@ class DailyDataFrame(SuperbDataFrame):
     def get_full_daily_comparison(
             self,
             other: DataFrame,
-            compare_by: ComparisonFunction,
+            using: ComparisonFunction,
             moving_avg_window: Optional[int] = None,
         ) -> DataFrame:
         r"""
-        Возвращает DataFrame с полным сравнением климатики с other по функции compare_by
+        Возвращает DataFrame с полным сравнением климатики с other по функции using
 
         Params:
             other: DataFrame с которым происходит сравнение,
-            compare_by: Функция сравнения (Принимает на вход DataFrame с колонкой Year),
+            using: Функция сравнения (Принимает на вход DataFrame с колонкой Year),
             moving_avg_window: Окно скользящего среднего для сглаживания климатики. По-умолчанию None -- сглаживание не применяется
         """
 
-        temp = self.compare_with_daily(other, compare_by, moving_avg_window=moving_avg_window)
-        temp_prev = self.compare_with_daily(other, compare_by, moving_avg_window=moving_avg_window, previous_year=True)
-        prec = self.compare_with_daily(other, compare_by, moving_avg_window=moving_avg_window, index='Precipitation')
-        prec_prev = self.compare_with_daily(other, compare_by, moving_avg_window=moving_avg_window, previous_year=True, index='Precipitation')
+        temp = self.compare_with_daily(other, using, moving_avg_window=moving_avg_window)
+        temp_prev = self.compare_with_daily(other, using, moving_avg_window=moving_avg_window, previous_year=True)
+        prec = self.compare_with_daily(other, using, moving_avg_window=moving_avg_window, index='Precipitation')
+        prec_prev = self.compare_with_daily(other, using, moving_avg_window=moving_avg_window, previous_year=True, index='Precipitation')
 
         temp_interim = merge(temp, temp_prev, on=['Month', 'Day'], suffixes=(' Temp', ' Temp prev'))
         prec_interim = merge(prec, prec_prev, on=['Month', 'Day'], suffixes=(' Prec', ' Prec prev'))
@@ -192,24 +192,24 @@ class DailyDataFrame(SuperbDataFrame):
     def plot_full_daily_comparison(
             self,
             other: DataFrame,
-            compare_by: ComparisonFunction,
+            using: ComparisonFunction,
             title: str,
             moving_avg_window: Optional[int] = None,
             xlim: list = [-180, 280]
         ) -> tuple:
 
         r"""
-        Строит график подневного сравнения климатики с other по функции compare_by
+        Строит график подневного сравнения климатики с other по функции using
 
         Params:
             other: DataFrame с которым происходит сравнение,
-            compare_by: Функция сравнения (Принимает на вход DataFrame с колонкой Year),
+            using: Функция сравнения (Принимает на вход DataFrame с колонкой Year),
             title: Заголовок графика
             moving_avg_window: Окно скользящего среднего для сглаживания климатики. По-умолчанию None -- сглаживание не применяется
             xlim: Пределы по оси x графика
         """
 
-        comparison = self.get_full_daily_comparison(other, compare_by, moving_avg_window)
+        comparison = self.get_full_daily_comparison(other, using, moving_avg_window)
 
         fig, ax = plt.subplots(nrows=1, ncols=1, dpi=200, figsize=(15, 3))
 
@@ -226,7 +226,7 @@ class DailyDataFrame(SuperbDataFrame):
         ax.plot(prev_x, comparison['Stat Temp prev'], color='red', label='Temperature')
         ax.plot(prev_x, comparison['Stat Prec prev'], color='blue', label='Precipitation')
 
-        ax.legend(frameon=False)
+        ax.legend()
         ax.set_xlim(xlim)
         ax.set_title(title)
 
