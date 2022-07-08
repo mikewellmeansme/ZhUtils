@@ -77,12 +77,14 @@ class DailyDataFrame(SuperbDataFrame):
     def plot_monthly(
             self,
             temp_ylim: list = [-25, 25],
-            prec_ylim: list = [0, 70]
+            prec_ylim: list = [0, 70],
+            title: str = '',
+            temperature_label: str = 'T, °C',
+            precipitation_label: str = 'P, mm'
         ) -> tuple:
         r"""
         Plot mean teperatures for all years and mean total precipitation
         """
-        plt.rcParams['font.size'] = '16'
         fig, ax = plt.subplots(nrows=1, ncols=1, dpi=300, figsize=(6, 6))
         plt.subplots_adjust(top=0.95, bottom=.1, right=.89, left=.11)
         
@@ -104,14 +106,14 @@ class DailyDataFrame(SuperbDataFrame):
         ax2.bar(range(12), mean_prec, color='royalblue', width=1)
         ax.set_xticks(range(12))
         ax.set_xticklabels(['J', 'F', 'M', 'A', 'M ', 'J', 'J', 'A', 'S', 'O', 'N', 'D'])
-        ax.set_ylabel('T, °C')
+        ax.set_ylabel(temperature_label)
 
-        ax2.set_ylabel('P, mm')
+        ax2.set_ylabel(precipitation_label)
         ax.set_ylim(temp_ylim)
         ax2.set_ylim(prec_ylim)
         ax.set_xlabel('Month')
 
-        plt.rcParams['font.size'] = '10'
+        ax.set_title(title)
         
         return fig, ax
     
