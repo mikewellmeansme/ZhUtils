@@ -1,3 +1,4 @@
+import imp
 from pandas import (
     ExcelFile,
     DataFrame,
@@ -5,7 +6,8 @@ from pandas import (
     read_csv
 )
 from dataclasses import dataclass
-
+from typing import Optional
+from normalization import get_normalized_df
 
 @dataclass
 class Tracheids:
@@ -19,7 +21,6 @@ class Tracheids:
             self.data = self._load_from_xlsx_()
         elif self.file_path.endswith('.csv'):
             self.data = self._load_from_csv_()
-
 
     def _load_from_xlsx_(self) -> DataFrame:
 
@@ -43,7 +44,17 @@ class Tracheids:
         result = read_csv(self.file_path)
         return result
 
-
     def to_csv(self, output_path) -> None:
         self.data.to_csv(f'{output_path}{self.name}.csv', index=False)
+    
+    def normalize(self, to: Optional[int] = None) -> DataFrame:
+        """
+        Params:
+            to: The number of cells to which the tracheidograms should be normalized
+                default = None, i.e. "average number of cells in tracheid" 
+        """
+        result = self.data.groupby(['Tree', 'Year']).apply(get_normalized_df).reset_index().drop(columns=['level_2'])
+
+        return result
+
     
