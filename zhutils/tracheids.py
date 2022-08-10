@@ -7,7 +7,8 @@ from pandas import (
 )
 from dataclasses import dataclass
 from typing import Optional
-from normalization import get_normalized_df
+from zhutils.normalization import get_normalized_df
+
 
 @dataclass
 class Tracheids:
@@ -53,7 +54,7 @@ class Tracheids:
             to: The number of cells to which the tracheidograms should be normalized
                 default = None, i.e. "average number of cells in tracheid" 
         """
-        result = self.data.groupby(['Tree', 'Year']).apply(get_normalized_df).reset_index().drop(columns=['level_2'])
+        result = self.data.groupby(['Tree', 'Year']).apply(get_normalized_df, to).reset_index().drop(columns=['level_2'])
 
         return result
 
