@@ -1,4 +1,3 @@
-import imp
 from pandas import (
     ExcelFile,
     DataFrame,
@@ -6,7 +5,6 @@ from pandas import (
     read_csv
 )
 from dataclasses import dataclass
-from typing import Optional
 from zhutils.normalization import get_normalized_df
 
 
@@ -48,11 +46,10 @@ class Tracheids:
     def to_csv(self, output_path) -> None:
         self.data.to_csv(f'{output_path}{self.name}.csv', index=False)
     
-    def normalize(self, to: Optional[int] = None) -> DataFrame:
+    def normalize(self, to: int) -> DataFrame:
         """
         Params:
             to: The number of cells to which the tracheidograms should be normalized
-                default = None, i.e. "average number of cells in tracheid" 
         """
         result = self.data.groupby(['Tree', 'Year']).apply(get_normalized_df, to).reset_index().drop(columns=['level_2'])
 

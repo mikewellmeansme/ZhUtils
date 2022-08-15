@@ -1,6 +1,5 @@
-from typing import List, Optional
+from typing import List
 from pandas import DataFrame
-from numpy import round, mean
 
 
 def get_normalized_list(x: List, norm: int) -> List:
@@ -14,10 +13,8 @@ def get_normalized_list(x: List, norm: int) -> List:
     return l_norm
 
 
-def get_normalized_df(df: DataFrame, norm: Optional[int] = None) -> DataFrame:
+def get_normalized_df(df: DataFrame, norm: int) -> DataFrame:
     loc_df = df.reset_index(drop=True)
-    if not norm:
-        norm = int(round(mean(df['№'])))
     columns = [column for column in loc_df.columns if 'D' in column or 'CWT' in column]
     result = {
         'TRW': [loc_df['TRW'][0]]*norm,
