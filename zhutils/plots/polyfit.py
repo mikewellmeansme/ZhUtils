@@ -7,7 +7,7 @@ sign = lambda el: '-' if el < 0 else '+'
 is_small = lambda el: abs(el) < 0.0001
 
 
-def get_poly1d(x: List, y: List, deg: int) -> Tuple[np.array, np.poly1d]:
+def get_poly1d(x: List, y: List, deg: int) -> np.poly1d:
     """
     :param x: List of values from x-axis
     :param y: List of values from y-axis
