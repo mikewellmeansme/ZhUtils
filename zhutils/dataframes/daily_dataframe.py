@@ -13,7 +13,7 @@ from pandera import (
     DataFrameSchema
 )
 from typing import Callable, Optional
-from zhutils.superb_dataframe import SuperbDataFrame
+from zhutils.dataframes import SuperbDataFrame
 
 
 daily_dataframe_schema = DataFrameSchema({
