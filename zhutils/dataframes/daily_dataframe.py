@@ -28,6 +28,19 @@ other_schema = DataFrameSchema({
     'Year' : Column(int)
 })
 
+comparison_schema = DataFrameSchema({
+    'Month' : Column(int),
+    'Day' : Column(int),
+    'Stat Temp' : Column(float, nullable=True),
+    'P-value Temp' : Column(float, nullable=True),
+    'Stat Temp prev' : Column(float, nullable=True),
+    'P-value Temp prev' : Column(float, nullable=True),
+    'Stat Prec' : Column(float, nullable=True),
+    'P-value Prec' : Column(float, nullable=True),
+    'Stat Prec prev' : Column(float, nullable=True),
+    'P-value Prec prev' : Column(float, nullable=True),
+})
+
 ComparisonFunction = Callable[[DataFrame], tuple[float, float]]
 
 
@@ -200,7 +213,8 @@ class DailyDataFrame(SuperbDataFrame):
             using: ComparisonFunction,
             title: str,
             moving_avg_window: Optional[int] = None,
-            xlim: list = [-180, 280]
+            xlim: list = [-180, 280],
+            comparison: Optional[DataFrame] = None
         ) -> tuple:
 
         r"""
@@ -212,9 +226,13 @@ class DailyDataFrame(SuperbDataFrame):
             title: Заголовок графика
             moving_avg_window: Окно скользящего среднего для сглаживания климатики. По-умолчанию None -- сглаживание не применяется
             xlim: Пределы по оси x графика
+            comparison: Результат self.get_full_daily_comparison
         """
 
-        comparison = self.get_full_daily_comparison(other, using, moving_avg_window)
+        if comparison is not None:
+            comparison_schema.validate(comparison)
+        else:
+            comparison = self.get_full_daily_comparison(other, using, moving_avg_window)
 
         fig, ax = plt.subplots(nrows=1, ncols=1, dpi=200, figsize=(15, 3))
 
