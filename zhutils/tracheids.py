@@ -14,7 +14,6 @@ class Tracheids:
     file_path: str
     trees: list
 
-
     def __post_init__(self):
         if self.file_path.endswith('.xlsx'):
             self.data = self._load_from_xlsx_()
@@ -54,5 +53,3 @@ class Tracheids:
         result = self.data.groupby(['Tree', 'Year']).apply(get_normalized_df, to).reset_index().drop(columns=['level_2'])
 
         return result
-
-    

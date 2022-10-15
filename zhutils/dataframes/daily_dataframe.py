@@ -7,22 +7,20 @@ from pandas import (
     read_excel, 
     DataFrame
 )
-from typing import Callable, Optional, List
+from typing import Callable, Optional, List, Tuple
 
 from zhutils.dataframes.schemas import *
 from zhutils.dataframes.superb_dataframe import SuperbDataFrame
 
-ComparisonFunction = Callable[[DataFrame], tuple[float, float]]
+ComparisonFunction = Callable[[DataFrame], Tuple[float, float]]
 
 
 class DailyDataFrame(SuperbDataFrame):
-
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         daily_dataframe_schema.validate(self)
 
-    
     def moving_avg(
             self,
             window: int = 7,
@@ -47,7 +45,6 @@ class DailyDataFrame(SuperbDataFrame):
 
         return result
 
-
     def moving_sum(
             self, 
             window: int = 7,
@@ -68,7 +65,6 @@ class DailyDataFrame(SuperbDataFrame):
 
         return result
     
-
     def plot_monthly(
             self,
             temp_ylim: List[float] = [-25, 25],
@@ -112,7 +108,6 @@ class DailyDataFrame(SuperbDataFrame):
         
         return fig, ax
     
-
     def compare_with_daily(
             self,
             other: DataFrame,
@@ -157,7 +152,6 @@ class DailyDataFrame(SuperbDataFrame):
         result = DataFrame(comparison).rename(columns=columns)
         return result
     
-
     def get_full_daily_comparison(
             self,
             other: DataFrame,
@@ -184,7 +178,6 @@ class DailyDataFrame(SuperbDataFrame):
         result = merge(temp_interim, prec_interim, on=['Month', 'Day'])
 
         return result
-
 
     def plot_full_daily_comparison(
             self,

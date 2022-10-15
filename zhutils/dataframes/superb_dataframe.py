@@ -24,10 +24,8 @@ from zhutils.correlation import (
 
 class SuperbDataFrame(DataFrame):
 
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
 
     def corr_and_p_values(
             self,
@@ -55,7 +53,6 @@ class SuperbDataFrame(DataFrame):
                 result[c1][c2] = print_r_anp_p(r, p, r_decimals, p_decimals)
 
         return result
-
 
     def bootstrap_corr(
             self,
@@ -110,7 +107,6 @@ class SuperbDataFrame(DataFrame):
                     result[c1][c2] = NaN
         return result
 
-
     def pairwise_len(self) -> DataFrame:
         r"""
         Returns the DataFrame with lengths of pairwise overlay of columns
@@ -136,7 +132,6 @@ class SuperbDataFrame(DataFrame):
                 result[c1][c2] = len(dropna(self[c1], self[c2])[0])
         return result
     
-
     def median_index(self) -> Series:
         r"""
         Returns the Series with indexes for the median elements per column
