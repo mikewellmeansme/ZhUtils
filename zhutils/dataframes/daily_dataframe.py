@@ -54,8 +54,8 @@ class DailyDataFrame(SuperbDataFrame):
     
     def moving_avg(
             self,
-            columns: List[str],
             window: int = 7,
+            columns: Optional[List[str]] = None,
             nanmean: Optional[bool] = False
         ) -> DataFrame:
         r"""
@@ -63,26 +63,37 @@ class DailyDataFrame(SuperbDataFrame):
         window : окно
         nanmean : используем nanmean для сглаживания? (тогда потеряются данные по краям)
         """
+        columns = columns or ['Temperature', 'Precipitation']
         result = self[columns]
         if nanmean:
             result = result.rolling(window=window, center=True).apply(np_nanmean)
         else:
             result = result.rolling(window=window, center=True, min_periods=1).mean()
         
+        result['Year'] = self['Year']
+        result['Month'] = self['Month']
+        result['Day'] = self['Day']
+
         return result
 
 
     def moving_sum(
             self, 
-            columns: List[str],
-            window: int = 7
+            window: int = 7,
+            columns: Optional[List[str]] = None,
         )-> DataFrame:
         r"""
         Возвращает скользящую сумму для выбранных колонок
         window : окно
         """
+        columns = columns or ['Temperature', 'Precipitation']
+
         result = self[columns]
         result = self.rolling(window=window, center=True, min_periods=1).sum()
+        
+        result['Year'] = self['Year']
+        result['Month'] = self['Month']
+        result['Day'] = self['Day']
         
         return result
     
@@ -152,10 +163,7 @@ class DailyDataFrame(SuperbDataFrame):
         other_schema.validate(other)
 
         if moving_avg_window:
-            df = self.copy()
-            rolled_df = self.moving_avg(['Temperature', 'Precipitation'], moving_avg_window)
-            df['Temperature'] = rolled_df['Temperature']
-            df['Precipitation'] = rolled_df['Precipitation']
+            df = self.moving_avg(window=moving_avg_window)
         else:
             df = self
 
