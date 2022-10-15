@@ -7,7 +7,9 @@ from scipy.stats import bootstrap
 from typing import (
     Union,
     Callable,
-    Iterable
+    Iterable,
+    Dict,
+    Tuple
 )
 
 from zhutils.correlation import (
@@ -27,8 +29,12 @@ class SuperbDataFrame(DataFrame):
         super().__init__(*args, **kwargs)
 
 
-    def corr_and_p_values(self, corr_function: Callable[[Iterable, Iterable], tuple[float, float]] = dropna_pearsonr,
-                          r_decimals: int = 2, p_decimals: int = 3) -> DataFrame:
+    def corr_and_p_values(
+            self,
+            corr_function: Callable[[Iterable, Iterable], Tuple[float, float]] = dropna_pearsonr,
+            r_decimals: int = 2,
+            p_decimals: int = 3
+        ) -> DataFrame:
         r"""
         Similar to DataFrame.corr(), but returns correlations between columns with their p-values.
         Cell format: '0.90\n(p=0.001)'.
@@ -51,10 +57,14 @@ class SuperbDataFrame(DataFrame):
         return result
 
 
-    def bootstrap_corr(self, bootstrap_parameters: dict,
-                       corr_function: Callable[[Iterable, Iterable], tuple[float, float]] = dropna_spearmanr,
-                       output_function: Callable[..., Union[str, float]] = print_r_anp_p,
-                       r_decimals: int = 2, p_decimals: int = 3) -> DataFrame:
+    def bootstrap_corr(
+            self,
+            bootstrap_parameters: Dict,
+            corr_function: Callable[[Iterable, Iterable], Tuple[float, float]] = dropna_spearmanr,
+            output_function: Callable[..., Union[str, float]] = print_r_anp_p,
+            r_decimals: int = 2,
+            p_decimals: int = 3
+        ) -> DataFrame:
         r"""
         Similar to DataFrame.corr(), but returns bootstrap correlations between columns.
         Cell format must be described in output_func.

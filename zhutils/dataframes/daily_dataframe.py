@@ -12,7 +12,7 @@ from pandera import (
     Column,
     DataFrameSchema
 )
-from typing import Callable, Optional
+from typing import Callable, Optional, List
 from zhutils.dataframes import SuperbDataFrame
 
 
@@ -54,7 +54,7 @@ class DailyDataFrame(SuperbDataFrame):
     
     def moving_avg(
             self,
-            columns: list,
+            columns: List[str],
             window: int = 7,
             nanmean: Optional[bool] = False
         ) -> DataFrame:
@@ -74,7 +74,7 @@ class DailyDataFrame(SuperbDataFrame):
 
     def moving_sum(
             self, 
-            columns: list,
+            columns: List[str],
             window: int = 7
         )-> DataFrame:
         r"""
@@ -89,8 +89,8 @@ class DailyDataFrame(SuperbDataFrame):
 
     def plot_monthly(
             self,
-            temp_ylim: list = [-25, 25],
-            prec_ylim: list = [0, 70],
+            temp_ylim: List[float] = [-25, 25],
+            prec_ylim: List[float] = [0, 70],
             title: str = '',
             temperature_label: str = 'T, °C',
             precipitation_label: str = 'P, mm'
@@ -213,7 +213,7 @@ class DailyDataFrame(SuperbDataFrame):
             using: ComparisonFunction,
             title: str,
             moving_avg_window: Optional[int] = None,
-            xlim: list = [-180, 280],
+            xlim: List[int] = [-180, 280],
             comparison: Optional[DataFrame] = None
         ) -> tuple:
 
