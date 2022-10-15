@@ -7,39 +7,10 @@ from pandas import (
     read_excel, 
     DataFrame
 )
-from pandera import (
-    Check,
-    Column,
-    DataFrameSchema
-)
 from typing import Callable, Optional, List
-from zhutils.dataframes import SuperbDataFrame
 
-
-daily_dataframe_schema = DataFrameSchema({
-    'Year' : Column(int),
-    'Month': Column(int),
-    'Day': Column(int),
-    'Temperature': Column(float, checks=[Check.ge(-100), Check.le(100)], nullable=True),
-    'Precipitation': Column(float, checks=[Check.ge(0), Check.le(1000)], nullable=True),
-})
-
-other_schema = DataFrameSchema({
-    'Year' : Column(int)
-})
-
-comparison_schema = DataFrameSchema({
-    'Month' : Column(int),
-    'Day' : Column(int),
-    'Stat Temp' : Column(float, nullable=True),
-    'P-value Temp' : Column(float, nullable=True),
-    'Stat Temp prev' : Column(float, nullable=True),
-    'P-value Temp prev' : Column(float, nullable=True),
-    'Stat Prec' : Column(float, nullable=True),
-    'P-value Prec' : Column(float, nullable=True),
-    'Stat Prec prev' : Column(float, nullable=True),
-    'P-value Prec prev' : Column(float, nullable=True),
-})
+from zhutils.dataframes.schemas import *
+from zhutils.dataframes.superb_dataframe import SuperbDataFrame
 
 ComparisonFunction = Callable[[DataFrame], tuple[float, float]]
 
@@ -94,7 +65,7 @@ class DailyDataFrame(SuperbDataFrame):
         result['Year'] = self['Year']
         result['Month'] = self['Month']
         result['Day'] = self['Day']
-        
+
         return result
     
 
