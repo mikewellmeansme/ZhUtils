@@ -227,6 +227,9 @@ class DailyDataFrame(SuperbDataFrame):
 
         return fig, ax
 
+    def get_growth_season(self, ) -> DataFrame:
+        return self.moving_avg().groupby('Year').apply(get_year_growth_season).reset_index().drop(columns=['level_1'])
+
 
 def daily_df_reshape(file_path: str, temp_sheet: str, prec_sheet: str) -> SuperbDataFrame:
     r"""
@@ -255,3 +258,60 @@ def daily_df_reshape(file_path: str, temp_sheet: str, prec_sheet: str) -> Superb
         'Precipitation': prec.drop(columns=['Month', 'Day']).T.values.reshape(-1),
     })
     return result
+
+
+def get_istart(df: DataFrame, window: int = 10, threshold: float = 108) -> Optional[int]:
+    """
+    Функция нахождения индекса начала сезона роста в DataFrame df
+
+    Params:
+        df: DataFrame соответствующий daily_dataframe_schema, но имеющий всего 1 год
+        window: Окно скользящей суммы
+        threshold: Порог по скользящей сумме температур, после которого начинается сезон роста
+    """
+    rolled_sum = df.rolling(window=window, center=True, min_periods=1).sum()
+    start_cond = df[rolled_sum['Temperature'] > threshold]
+    if len(start_cond):
+        return start_cond.iloc[0].name
+    else:
+        return None
+
+
+def get_iend(df: DataFrame, istart: int, threshold: float = 6) -> Optional[int]:
+    """
+    Функция нахождения индекса окончания сезона роста в DataFrame df
+
+    Params:
+        df: DataFrame соответствующий daily_dataframe_schema, но имеющий всего 1 год
+        istart: Индекс начала сезона роста в df.
+        threshold: Минимальная температура, после которой сезон роста заканчивается
+    """
+    temp = df.loc[istart:]
+    end_cond = temp[temp['Temperature'] < threshold]
+
+    if len(end_cond):
+        return end_cond.iloc[0].name
+    else:
+        return None
+
+
+def get_year_growth_season(df: DataFrame) -> Optional[DataFrame]:
+    """
+    Функция, возвращающая только данные за сезон роста. Используется в groupby('Year').apply
+    
+    Params:
+        df: DataFrame соответствующий daily_dataframe_schema, но имеющий всего 1 год
+    """
+    istart = get_istart(df)
+
+    if istart is None:
+        return None
+
+    iend = get_iend(df, istart)
+
+    if iend is None:
+        return None
+    
+    # TODO: Разобраться, что делать с годами, в которых сезон роста < 100
+    
+    return df.loc[istart:iend].drop(columns='Year')
