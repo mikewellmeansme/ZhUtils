@@ -231,9 +231,9 @@ class DailyDataFrame(SuperbDataFrame):
         return self.moving_avg().groupby('Year').apply(get_year_growth_season).reset_index().drop(columns=['level_1'])
 
 
-def daily_df_reshape(file_path: str, temp_sheet: str, prec_sheet: str) -> SuperbDataFrame:
+def daily_wide_to_long(file_path: str, temp_sheet: str, prec_sheet: str) -> SuperbDataFrame:
     r"""
-    Function for merging two daily tables into one SuperbDataFrame
+    Function for merging two wide daily tables into one long SuperbDataFrame
 
     Params:
         file_path: Path to the xlsx file with daily climate data
@@ -242,22 +242,21 @@ def daily_df_reshape(file_path: str, temp_sheet: str, prec_sheet: str) -> Superb
     """
     temp = read_excel(file_path, sheet_name=temp_sheet)
     prec = read_excel(file_path, sheet_name=prec_sheet)
-    years = []
-    months = []
-    days = []
-    for year in temp.drop(columns=['Month', 'Day']).columns:
-        months.extend(temp['Month'])
-        days.extend(temp['Day'])
-        years.extend([year]*366)
-    
-    result = SuperbDataFrame({
-        'Year': years,
-        'Month': months,
-        'Day': days,
-        'Temperature': temp.drop(columns=['Month', 'Day']).T.values.reshape(-1),
-        'Precipitation': prec.drop(columns=['Month', 'Day']).T.values.reshape(-1),
-    })
-    return result
+    temp = temp.melt(
+        id_vars = ['Month', 'Day'],
+        var_name='Year',
+        value_name = 'Temperature'
+    )
+    prec = prec.melt(
+        id_vars = ['Month', 'Day'],
+        var_name='Year',
+        value_name = 'Precipitation'
+    )
+
+    result = merge(temp, prec, on=('Year', 'Month', 'Day'), how='outer')
+    result.insert(0, 'Year', result.pop('Year'))
+
+    return SuperbDataFrame(result)
 
 
 def get_istart(df: DataFrame, window: int = 10, threshold: float = 108) -> Optional[int]:
