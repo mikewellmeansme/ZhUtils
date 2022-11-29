@@ -11,6 +11,7 @@ from typing import Callable, Optional, List, Tuple
 
 from zhutils.dataframes.schemas import *
 from zhutils.dataframes.superb_dataframe import SuperbDataFrame
+from zhutils.dataframes.monthly_dataframe import MonthlyDataFrame
 
 ComparisonFunction = Callable[[DataFrame], Tuple[float, float]]
 
@@ -229,6 +230,15 @@ class DailyDataFrame(SuperbDataFrame):
 
     def get_growth_season(self, ) -> DataFrame:
         return self.moving_avg().groupby('Year').apply(get_year_growth_season).reset_index().drop(columns=['level_1'])
+    
+    def to_monthly(self) -> MonthlyDataFrame:
+        return MonthlyDataFrame(
+            self.
+            groupby(['Year', 'Month']).
+            agg({'Temperature': 'mean', 'Precipitation': 'sum', 'Day': 'max'}).
+            reset_index().
+            rename(columns={'Day':'Days'})
+        )
 
 
 def daily_wide_to_long(file_path: str, temp_sheet: str, prec_sheet: str) -> SuperbDataFrame:
@@ -252,6 +262,9 @@ def daily_wide_to_long(file_path: str, temp_sheet: str, prec_sheet: str) -> Supe
         var_name='Year',
         value_name = 'Precipitation'
     )
+
+    # BUG: Усли температура короче осадков, то годы температуры меняют тип на float и 
+    # слияние идёт криво. 
 
     result = merge(temp, prec, on=('Year', 'Month', 'Day'), how='outer')
     result.insert(0, 'Year', result.pop('Year'))
