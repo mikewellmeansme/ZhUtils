@@ -1,25 +1,8 @@
 
-from pandas import (
-    merge,
-    read_excel, 
-    DataFrame
-)
-from pandera import (
-    Column,
-    DataFrameSchema
-)
-from typing import Callable, Optional, Tuple
+from typing import Optional
+from zhutils.common import ComparisonFunction, Months
 from zhutils.dataframes.superb_dataframe import SuperbDataFrame
 from zhutils.dataframes.schemas import other_schema, monthly_dataframe_schema
-
-month_names = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-
-"""monthly_dataframe_schema = DataFrameSchema({
-    'Year' : Column(int),
-    **{month : Column(float, nullable=True) for month in month_names}
-})"""
-
-ComparisonFunction = Callable[[DataFrame], Tuple[float, float]]
 
 
 class MonthlyDataFrame(SuperbDataFrame):
@@ -41,4 +24,4 @@ class MonthlyDataFrame(SuperbDataFrame):
             index='Year',
             columns='Month',
             values=clim_index
-        ).reset_index().rename(columns={i+1: month for i, month in enumerate(month_names)})
+        ).reset_index().rename(columns={month.value: month.name for month in Months})

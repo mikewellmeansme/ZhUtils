@@ -7,13 +7,12 @@ from pandas import (
     read_excel, 
     DataFrame
 )
-from typing import Callable, Optional, List, Tuple
+from typing import Optional, List
 
+from zhutils.common import ComparisonFunction
 from zhutils.dataframes.schemas import *
 from zhutils.dataframes.superb_dataframe import SuperbDataFrame
 from zhutils.dataframes.monthly_dataframe import MonthlyDataFrame
-
-ComparisonFunction = Callable[[DataFrame], Tuple[float, float]]
 
 
 class DailyDataFrame(SuperbDataFrame):
