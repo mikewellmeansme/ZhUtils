@@ -44,7 +44,7 @@ class SuperbDataFrame(DataFrame):
                            Signature: corr_function(Iterable, Iterable) -> (float, float)
             r_decimals: Number of decimal places of the correlation coefficient
             p_decimals: Number of decimal places of the p-value
-            highlight_from: Minimum highlightув p-value
+            highlight_from: Minimum highlighted p-value. Default None: nothing is highlighted
         """
 
         result = DataFrame(columns=self.columns)
