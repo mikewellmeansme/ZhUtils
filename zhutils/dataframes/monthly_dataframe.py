@@ -36,7 +36,7 @@ class MonthlyDataFrame(SuperbDataFrame):
         ) -> DataFrame:
         pass
 
-    def to_whide(self, clim_index: str = 'Temperature') -> DataFrame:
+    def to_wide(self, clim_index: str = 'Temperature') -> DataFrame:
         return self.pivot(
             index='Year',
             columns='Month',
