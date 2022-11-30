@@ -3,6 +3,8 @@ from pandera import (
     Column,
     DataFrameSchema
 )
+from zhutils.common import Months
+
 
 daily_dataframe_schema = DataFrameSchema({
     'Year' : Column(int),
@@ -12,12 +14,17 @@ daily_dataframe_schema = DataFrameSchema({
     'Precipitation': Column(float, checks=[Check.ge(0), Check.le(1000)], nullable=True),
 })
 
-monthly_dataframe_schema = DataFrameSchema({
+monthly_long_dataframe_schema = DataFrameSchema({
     'Year' : Column(int),
     'Month': Column(int),
     'Days': Column(int, required=False),
     'Temperature': Column(float, checks=[Check.ge(-100), Check.le(100)], nullable=True),
     'Precipitation': Column(float, checks=[Check.ge(0), Check.le(1000)], nullable=True),
+})
+
+monthly_wide_dataframe_schema = DataFrameSchema({
+    'Year' : Column(int),
+    **{month.name : Column(nullable=True) for month in Months}
 })
 
 other_schema = DataFrameSchema({
