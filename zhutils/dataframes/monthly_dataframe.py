@@ -20,15 +20,15 @@ class MonthlyDataFrame(SuperbDataFrame):
     @classmethod
     def from_wide(
             cls,
-            paths: List[str],
+            paths: List[Union[str, pd.DataFrame]],
             clim_indexes: List[str],
             sheet_names: Optional[List[Union[int, str]]]=None
         ):
         """
-        Creates a MonthlyDataFrame from multiple wide tables (csv, xls, xlsx)
+        Creates a MonthlyDataFrame from multiple wide tables (csv, xls, xlsx, pd.DataFrame)
 
         Params:
-            paths: Paths to the wide table files
+            paths: Paths to the wide table files or wide DataFrames
             clim_indexes: Names of climate index contained in each file
             sheet_names: Only for xls / xlsx files. Names of sheets with wide tables
         """
@@ -42,16 +42,19 @@ class MonthlyDataFrame(SuperbDataFrame):
         long_dfs = []
 
         for path, clim_index, sheet_name in zip(paths, clim_indexes, sheet_names): 
-            if path.endswith('.csv'):
-                wide_df = pd.read_csv(path)
-            elif path.endswith('.xls') or path.endswith('.xlsx'):
-                wide_df = pd.read_excel(path, sheet_name)
+            if isinstance(path, pd.DataFrame):
+                wide_df = path
             else:
-                raise FileExtentionError(
-                    f"""Wrong file extention for wide monthly dataframe! 
-                    Expected CSV, XLS or XLSX, 
-                    got {path}"""
-                )
+                if path.endswith('.csv'):
+                    wide_df = pd.read_csv(path)
+                elif path.endswith('.xls') or path.endswith('.xlsx'):
+                    wide_df = pd.read_excel(path, sheet_name)
+                else:
+                    raise FileExtentionError(
+                        f"""Wrong file extention for wide monthly dataframe! 
+                        Expected CSV, XLS or XLSX, 
+                        got {path}"""
+                    )
             
             monthly_wide_dataframe_schema.validate(wide_df)
 
