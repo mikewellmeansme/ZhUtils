@@ -1,5 +1,6 @@
+import pandas as pd
 
-from typing import Optional
+from typing import Optional, List, Union
 from zhutils.common import ComparisonFunction, Months
 from zhutils.dataframes.superb_dataframe import SuperbDataFrame
 from zhutils.dataframes.schemas import other_schema, monthly_dataframe_schema
@@ -12,14 +13,15 @@ class MonthlyDataFrame(SuperbDataFrame):
         monthly_dataframe_schema.validate(self)
     
     def compare_with(
-            other: DataFrame,
+            other: pd.DataFrame,
             using: ComparisonFunction,
             index: str = 'Temperature',
             previous_year: Optional[bool] = False
-        ) -> DataFrame:
+        ) -> pd.DataFrame:
+        other_schema.validate(other)
         pass
 
-    def to_wide(self, clim_index: str = 'Temperature') -> DataFrame:
+    def to_wide(self, clim_index: str = 'Temperature') -> pd.DataFrame:
         return self.pivot(
             index='Year',
             columns='Month',
