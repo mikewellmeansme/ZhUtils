@@ -11,7 +11,7 @@ from typing import (
     Dict,
     Tuple
 )
-
+from zhutils.common import CorrFunction
 from zhutils.correlation import (
     dropna,
     get_p_value,
@@ -29,7 +29,7 @@ class SuperbDataFrame(DataFrame):
 
     def corr_and_p_values(
             self,
-            corr_function: Callable[[Iterable, Iterable], Tuple[float, float]] = dropna_pearsonr,
+            corr_function: CorrFunction = dropna_pearsonr,
             r_decimals: int = 2,
             p_decimals: int = 3
         ) -> DataFrame:
@@ -57,7 +57,7 @@ class SuperbDataFrame(DataFrame):
     def bootstrap_corr(
             self,
             bootstrap_parameters: Dict,
-            corr_function: Callable[[Iterable, Iterable], Tuple[float, float]] = dropna_spearmanr,
+            corr_function: CorrFunction = dropna_spearmanr,
             output_function: Callable[..., Union[str, float]] = print_r_anp_p,
             r_decimals: int = 2,
             p_decimals: int = 3

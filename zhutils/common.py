@@ -1,8 +1,16 @@
 from pandas import DataFrame
-from typing import Callable, Optional, Tuple
+from typing import (
+    Callable,
+    Iterable,
+    Optional,
+    Tuple
+)
 from enum import Enum
 
 ComparisonFunction = Callable[[DataFrame], Tuple[float, float]]
+
+CorrFunction = Callable[[Iterable, Iterable], Tuple[float, float]]
+
 
 class Months(Enum):
     January   = 1
