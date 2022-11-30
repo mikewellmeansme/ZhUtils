@@ -1,15 +1,14 @@
-from numpy import NaN
+from numpy import NaN, arange
 from pandas import ( 
     DataFrame,
     Series
 )
 from scipy.stats import bootstrap
 from typing import (
-    Union,
     Callable,
-    Iterable,
     Dict,
-    Tuple
+    Optional,
+    Union
 )
 from zhutils.common import CorrFunction
 from zhutils.correlation import (
@@ -18,7 +17,8 @@ from zhutils.correlation import (
     dropna_pearsonr,
     dropna_spearmanr,
     print_r_anp_p,
-    print_conf_interval_and_se
+    print_conf_interval_and_se,
+    check_highlight
 )
 
 
@@ -31,7 +31,9 @@ class SuperbDataFrame(DataFrame):
             self,
             corr_function: CorrFunction = dropna_pearsonr,
             r_decimals: int = 2,
-            p_decimals: int = 3
+            p_decimals: int = 3,
+            print_p_exponent: bool = True,
+            highlight_from: Optional[float] = None
         ) -> DataFrame:
         r"""
         Similar to DataFrame.corr(), but returns correlations between columns with their p-values.
@@ -42,15 +44,22 @@ class SuperbDataFrame(DataFrame):
                            Signature: corr_function(Iterable, Iterable) -> (float, float)
             r_decimals: Number of decimal places of the correlation coefficient
             p_decimals: Number of decimal places of the p-value
+            highlight_from: Minimum highlightув p-value
         """
 
         result = DataFrame(columns=self.columns)
         result = result.transpose().join(result, how='outer')
 
+        to_highlight = {}
+
         for c1 in self.columns:
             for c2 in self.columns:
                 r, p = corr_function(self[c1], self[c2])
-                result[c1][c2] = print_r_anp_p(r, p, r_decimals, p_decimals)
+                result[c1][c2] = print_r_anp_p(r, p, r_decimals, p_decimals, print_p_exponent)
+                to_highlight[(c1, c2)] = check_highlight(r, p, highlight_from)
+        
+        if highlight_from:
+            result = result.style.apply(lambda x: [to_highlight[x.name, i] for i in x.index])
 
         return result
 

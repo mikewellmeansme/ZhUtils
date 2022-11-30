@@ -74,3 +74,21 @@ def print_conf_interval_and_se(
         **kwargs
     ) -> str:
     return f"[{low:.{r_decimals}f}; {high:.{r_decimals}f}]\n(se={se:.{se_decimals}f})"
+
+
+def check_highlight(
+        r: float,
+        p: float,
+        highlight_from: Optional[float]
+    ) -> str:
+
+    if not highlight_from:
+        return ''
+    
+    if p < highlight_from:
+        if r > 0:
+            return 'background-color: lightgreen'
+        else:
+            return 'background-color: lightcoral'
+    
+    return ''
