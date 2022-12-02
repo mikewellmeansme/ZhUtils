@@ -69,13 +69,37 @@ class MonthlyDataFrame(SuperbDataFrame):
         return MonthlyDataFrame(result)
     
     def compare_with(
+            self,
             other: pd.DataFrame,
             using: ComparisonFunction,
-            index: str = 'Temperature',
+            clim_index: str = 'Temperature',
             previous_year: Optional[bool] = False
         ) -> pd.DataFrame:
+        """
+        Params:
+            other: DataFrame с которым происходит сравнение (должен иметь колонку 'Year'),
+            using: Функция сравнения (Принимает на вход DataFrame с колонкой 'Year'),
+            clim_index: 'Temperature', 'Precipitation' or other climate index from current DataFrame columns
+            previous_year: Флаг того, сравнивается ли климатика этого года или предыдущего
+        """
+
         other_schema.validate(other)
-        pass
+        groups = self.drop(columns=['Year']).groupby('Month').groups
+        comparison = []
+
+        for key in groups:
+            temp_df = self.loc[groups[key]]
+            if previous_year:
+                temp_df[clim_index] = temp_df[clim_index].shift()
+
+            to_compare = temp_df.merge(other, on='Year')
+            stat, p_value = using(to_compare, clim_index)
+
+            comparison.append([key, stat, p_value])
+        
+        columns = {0: 'Month', 1:'Stat', 2:'P-value'}
+        result = pd.DataFrame(comparison).rename(columns=columns)
+        return result
 
     def to_wide(self, clim_index: str = 'Temperature') -> pd.DataFrame:
         return self.pivot(
