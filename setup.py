@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name='zhutils',
-    version='0.1.2',
+    version='0.2.0',
     description='A personal collection of tools for data processing',
     author='Mikhail Zharkov',
     author_email='mzharkov@sfu-kras.ru',
@@ -13,6 +13,7 @@ setuptools.setup(
         'numpy',
         'scipy',
         'pandas',
-        'pandera'
+        'pandera',
+        'matplotlib'
     ]
 )
