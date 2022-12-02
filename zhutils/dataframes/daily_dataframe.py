@@ -65,7 +65,7 @@ class DailyDataFrame(SuperbDataFrame):
 
         return result
     
-    def plot_monthly(
+    def plot_total(
             self,
             temp_ylim: List[float] = [-25, 25],
             prec_ylim: List[float] = [0, 70],
@@ -74,7 +74,7 @@ class DailyDataFrame(SuperbDataFrame):
             precipitation_label: str = 'P, mm'
         ) -> tuple:
         r"""
-        Plot mean teperatures for all years and mean total precipitation
+        Plots mean monthly teperatures and total precipitatioins for all years
         """
         fig, ax = plt.subplots(nrows=1, ncols=1, dpi=300, figsize=(6, 6))
         plt.subplots_adjust(top=0.95, bottom=.1, right=.89, left=.11)
