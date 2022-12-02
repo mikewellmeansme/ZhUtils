@@ -108,7 +108,7 @@ class DailyDataFrame(SuperbDataFrame):
         
         return fig, ax
     
-    def compare_with_daily(
+    def compare_with(
             self,
             other: DataFrame,
             using: ComparisonFunction,
@@ -152,7 +152,7 @@ class DailyDataFrame(SuperbDataFrame):
         result = DataFrame(comparison).rename(columns=columns)
         return result
     
-    def get_full_daily_comparison(
+    def get_full_comparison(
             self,
             other: DataFrame,
             using: ComparisonFunction,
@@ -179,7 +179,7 @@ class DailyDataFrame(SuperbDataFrame):
 
         return result
 
-    def plot_full_daily_comparison(
+    def plot_full_comparison(
             self,
             other: DataFrame,
             using: ComparisonFunction,
