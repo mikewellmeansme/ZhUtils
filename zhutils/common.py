@@ -7,7 +7,7 @@ from typing import (
 )
 from enum import Enum
 
-ComparisonFunction = Callable[[DataFrame], Tuple[float, float]]
+ComparisonFunction = Callable[[DataFrame, str], Tuple[float, float]]
 
 CorrFunction = Callable[[Iterable, Iterable], Tuple[float, float]]
 
