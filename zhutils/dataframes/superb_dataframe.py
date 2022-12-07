@@ -10,7 +10,7 @@ from typing import (
     Optional,
     Union
 )
-from zhutils.common import CorrFunction
+from zhutils.common import CorrFunction, OutputFunction
 from zhutils.correlation import (
     dropna,
     get_p_value,
@@ -30,6 +30,7 @@ class SuperbDataFrame(DataFrame):
     def corr_and_p_values(
             self,
             corr_function: CorrFunction = dropna_pearsonr,
+            output_function: OutputFunction = print_r_anp_p, 
             r_decimals: int = 2,
             p_decimals: int = 3,
             print_p_exponent: bool = True,
@@ -55,7 +56,7 @@ class SuperbDataFrame(DataFrame):
         for c1 in self.columns:
             for c2 in self.columns:
                 r, p = corr_function(self[c1], self[c2])
-                result[c1][c2] = print_r_anp_p(r, p, r_decimals, p_decimals, print_p_exponent)
+                result[c1][c2] = output_function(r, p, r_decimals, p_decimals, print_p_exponent)
                 to_highlight[(c1, c2)] = check_highlight(r, p, highlight_from)
         
         if highlight_from:
@@ -67,7 +68,7 @@ class SuperbDataFrame(DataFrame):
             self,
             bootstrap_parameters: Dict,
             corr_function: CorrFunction = dropna_spearmanr,
-            output_function: Callable[..., Union[str, float]] = print_r_anp_p,
+            output_function: OutputFunction = print_r_anp_p,
             r_decimals: int = 2,
             p_decimals: int = 3
         ) -> DataFrame:

@@ -3,12 +3,13 @@ from typing import (
     Callable,
     Iterable,
     Optional,
-    Tuple
+    Tuple,
+    Union
 )
 from enum import Enum
 
 ComparisonFunction = Callable[[DataFrame, str], Tuple[float, float]]
-
+OutputFunction = Callable[..., Union[str, float]]
 CorrFunction = Callable[[Iterable, Iterable], Tuple[float, float]]
 
 
