@@ -102,8 +102,13 @@ class MonthlyDataFrame(SuperbDataFrame):
         return result
 
     def to_wide(self, clim_index: str = 'Temperature') -> pd.DataFrame:
-        return self.pivot(
-            index='Year',
-            columns='Month',
-            values=clim_index
-        ).reset_index().rename(columns={month.value: month.name for month in Months})
+        return (
+            self.pivot(
+                index='Year',
+                columns='Month',
+                values=clim_index
+            ).
+            reset_index().
+            rename(columns={month.value: month.name for month in Months}).
+            rename_axis(None, axis=1)
+        )
