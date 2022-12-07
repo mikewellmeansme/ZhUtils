@@ -103,7 +103,8 @@ class MonthlyDataFrame(SuperbDataFrame):
 
     def to_wide(self, clim_index: str = 'Temperature') -> pd.DataFrame:
         return (
-            self.pivot(
+            self.
+            pivot(
                 index='Year',
                 columns='Month',
                 values=clim_index
