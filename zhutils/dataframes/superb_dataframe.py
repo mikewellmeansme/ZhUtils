@@ -1,14 +1,14 @@
 from numpy import NaN, arange
 from pandas import ( 
     DataFrame,
-    Series
+    Series,
+    read_csv,
+    read_excel
 )
 from scipy.stats import bootstrap
 from typing import (
-    Callable,
     Dict,
-    Optional,
-    Union
+    Optional
 )
 from zhutils.common import CorrFunction, OutputFunction
 from zhutils.correlation import (
@@ -26,6 +26,22 @@ class SuperbDataFrame(DataFrame):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+    
+    def __getitem__(self, key):
+        result = super().__getitem__(key)
+
+        if isinstance(result, DataFrame):
+            return self.__class__(result)
+        else:
+            return result
+    
+    @classmethod
+    def from_csv(cls, path):
+        return cls(read_csv(path))
+    
+    @classmethod
+    def from_excel(cls, path):
+        return cls(read_excel(path))
 
     def corr_and_p_values(
             self,
