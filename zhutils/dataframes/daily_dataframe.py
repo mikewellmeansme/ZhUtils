@@ -167,10 +167,10 @@ class DailyDataFrame(SuperbDataFrame):
             moving_avg_window: Окно скользящего среднего для сглаживания климатики. По-умолчанию None -- сглаживание не применяется
         """
 
-        temp = self.compare_with_daily(other, using, moving_avg_window=moving_avg_window)
-        temp_prev = self.compare_with_daily(other, using, moving_avg_window=moving_avg_window, previous_year=True)
-        prec = self.compare_with_daily(other, using, moving_avg_window=moving_avg_window, index='Precipitation')
-        prec_prev = self.compare_with_daily(other, using, moving_avg_window=moving_avg_window, previous_year=True, index='Precipitation')
+        temp = self.compare_with(other, using, moving_avg_window=moving_avg_window)
+        temp_prev = self.compare_with(other, using, moving_avg_window=moving_avg_window, previous_year=True)
+        prec = self.compare_with(other, using, moving_avg_window=moving_avg_window, index='Precipitation')
+        prec_prev = self.compare_with(other, using, moving_avg_window=moving_avg_window, previous_year=True, index='Precipitation')
 
         temp_interim = merge(temp, temp_prev, on=['Month', 'Day'], suffixes=(' Temp', ' Temp prev'))
         prec_interim = merge(prec, prec_prev, on=['Month', 'Day'], suffixes=(' Prec', ' Prec prev'))
@@ -198,13 +198,13 @@ class DailyDataFrame(SuperbDataFrame):
             title: Заголовок графика
             moving_avg_window: Окно скользящего среднего для сглаживания климатики. По-умолчанию None -- сглаживание не применяется
             xlim: Пределы по оси x графика
-            comparison: Результат self.get_full_daily_comparison
+            comparison: Результат self.get_full_comparison
         """
 
         if comparison is not None:
             comparison_schema.validate(comparison)
         else:
-            comparison = self.get_full_daily_comparison(other, using, moving_avg_window)
+            comparison = self.get_full_comparison(other, using, moving_avg_window)
 
         fig, ax = plt.subplots(nrows=1, ncols=1, dpi=200, figsize=(15, 3))
 
