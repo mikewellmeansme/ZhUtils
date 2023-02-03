@@ -3,8 +3,9 @@ from pandas import (
     DataFrame,
     Series,
     read_csv,
-    read_excel
+    read_excel,
 )
+from pandas.core.common import is_bool_indexer
 from scipy.stats import bootstrap
 from typing import (
     Dict,
@@ -30,7 +31,7 @@ class SuperbDataFrame(DataFrame):
     def __getitem__(self, key):
         result = super().__getitem__(key)
 
-        if isinstance(result, DataFrame):
+        if isinstance(result, DataFrame) and is_bool_indexer(key):
             return self.__class__(result)
         else:
             return result
