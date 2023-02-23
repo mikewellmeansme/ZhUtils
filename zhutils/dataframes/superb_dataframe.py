@@ -36,6 +36,10 @@ class SuperbDataFrame(DataFrame):
         else:
             return result
     
+    def reset_index(self, *args, **kwargs):
+        result = super().reset_index(*args, **kwargs)
+        return self.__class__(result)
+    
     @classmethod
     def from_csv(cls, path):
         return cls(read_csv(path))
