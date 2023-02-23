@@ -235,6 +235,28 @@ class DailyDataFrame(SuperbDataFrame):
             reset_index().
             rename(columns={'Day':'Days'})
         )
+    
+    def cut(
+            self,
+            start_month: int,
+            end_month: int,
+            start_day: int,
+            end_day: int
+        ):
+        """
+        Возвращает только те строки, даты которых лежат между
+        start_day start_month и end_day end_month
+        """
+        return self[
+            (
+                ((start_month == self['Month']) & (start_day <= self['Day'])) |
+                (start_month < self['Month'])
+            ) &
+            (
+                (self['Month'] < end_month) |
+                ((self['Month'] == end_month) & (self['Day'] <= end_day))
+            )
+        ].reset_index(drop=True)
 
 
 def daily_wide_to_long(file_path: str, temp_sheet: str, prec_sheet: str) -> SuperbDataFrame:
