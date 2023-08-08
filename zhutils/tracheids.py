@@ -5,6 +5,7 @@ from pandas import (
     read_csv
 )
 from dataclasses import dataclass
+from typing import Union
 from zhutils.normalization import get_normalized_df
 
 
@@ -45,11 +46,44 @@ class Tracheids:
     def to_csv(self, output_path) -> None:
         self.data.to_csv(f'{output_path}{self.name}.csv', index=False)
     
-    def normalize(self, to: int) -> DataFrame:
+    def normalize(self, to: Union[int, str] = 'mean') -> DataFrame:
         """
         Params:
             to: The number of cells to which the tracheidograms should be normalized
         """
-        result = self.data.groupby(['Tree', 'Year']).apply(get_normalized_df, to).reset_index().drop(columns=['level_2'])
+        if isinstance(to, int):
+            result = (
+                self
+                    .data
+                    .groupby(['Tree', 'Year'])
+                    .apply(get_normalized_df, to)
+            )
+        elif isinstance(to, str):
+            # TODO: min \ max \ median \ other support?
+            year_to_norm = (
+                self
+                    .data[['Tree', 'Year', '№']]
+                    .groupby(['Tree', 'Year'])
+                    .max()
+                    .reset_index()
+                    .groupby('Year')
+                    .mean()
+                    .applymap(lambda x: int(round(x)))
+                    .to_dict()
+                    ['№']
+            )
+            
+            def get_conditional_normalized_df(df):
+                year = df.head(1)['Year'].values[0]
+                return get_normalized_df(df, year_to_norm[year])
+            
+            result = (
+                self
+                    .data
+                    .groupby(['Tree', 'Year'])
+                    .apply(get_conditional_normalized_df)
+            )
+        else:
+            raise TypeError(f'Wrong type for argument {type(to)}. Expected int or str!')
 
-        return result
+        return result.reset_index().drop(columns=['level_2'])
